@@ -1,0 +1,3 @@
+../MY_HAL/SignalProcessing.c:3:6:executeTriger	16	static
+../MY_HAL/SignalProcessing.c:13:7:requiredVoltageRheostatControl	32	static
+../MY_HAL/SignalProcessing.c:23:10:calculationCMP	40	static
