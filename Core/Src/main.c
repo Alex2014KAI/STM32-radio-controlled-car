@@ -60,7 +60,17 @@ uint32_t CMP = 0; // CMP_MAX = 100; F_PWM = 1кГц
 float timeSample = 0.001; // Interrupt time
 float uREF = 0.0; // Voltage from the divider output
 float time = 5.0; // The time it takes for the input voltage to reach 3.2V
-// ДОБАВИТЬ ПРЕРЫВАНИЕ ПО ePWM!!!!
+// ДОБАВ�?ТЬ ПРЕРЫВАН�?Е ПО ePWM!!!!
+
+// Interrupt
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM1)
+    {
+    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, CMP);
+    }
+}
+//<> end Interrupt
 /* USER CODE END 0 */
 
 /**
@@ -93,7 +103,10 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+  __HAL_TIM_ENABLE_OCxPRELOAD(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_Base_Start_IT(&htim1);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+
   HAL_GPIO_WritePin(GPIOA, IN2_Pin, GPIO_PIN_RESET);
   /* USER CODE END 2 */
 
@@ -111,8 +124,6 @@ int main(void)
 			  CMP = 0;
 		  };
 		  CMP += 10;
-		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, CMP);
-
 	  };
 
   }
@@ -186,7 +197,7 @@ static void MX_TIM1_Init(void)
   htim1.Init.Period = 99;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
-  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
   {
     Error_Handler();
