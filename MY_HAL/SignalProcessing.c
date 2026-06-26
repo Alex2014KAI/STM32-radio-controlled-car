@@ -30,6 +30,7 @@ uint32_t calculationCMP(float u_ref, float u_dc, float MaxCMP, float u_fb){
 	}else{
 		CMP = (1.0 - u_ref / u_dc) * MaxCMP;
 	}
+
 	return CMP;
 };//
 //<>

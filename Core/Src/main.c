@@ -58,15 +58,30 @@ static void MX_TIM1_Init(void);
 uint16_t outTriggerButton = 0;
 uint32_t CMP = 0; // CMP_MAX = 100; F_PWM = 1кГц
 float timeSample = 0.001; // Interrupt time
-float uREF = 0.0; // Voltage from the divider output
+float uFB = 0.0;  // Voltage from the divider output
+float uREF = 0.0; // Voltage for CMP calculation
 float time = 5.0; // The time it takes for the input voltage to reach 3.2V
-// ДОБАВ�?ТЬ ПРЕРЫВАН�?Е ПО ePWM!!!!
+float voltageSample;
 
 // Interrupt
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM1)
     {
+    	if(uFB > 3.199){
+    		uFB = 0.0;
+    	};// end if
+    	//<>
+    	uFB += voltageSample;
+    	uREF = requiredVoltageRheostatControl(uFB, 3.2);
+    	CMP = calculationCMP(uREF, 3.2, 99, uFB);
+    	//<>
+    	if(uFB >= 1.6){
+    		HAL_GPIO_WritePin(GPIOA, IN2_Pin, GPIO_PIN_SET);
+    	}else{
+    		HAL_GPIO_WritePin(GPIOA, IN2_Pin, GPIO_PIN_RESET);
+    	}// end if
+    	//<>
     	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, CMP);
     }
 }
@@ -89,7 +104,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  voltageSample = 3.2 / time * timeSample;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -107,7 +122,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim1);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 
-  HAL_GPIO_WritePin(GPIOA, IN2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, IN2_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
